@@ -21,6 +21,7 @@ class _AuthScreenState extends State<AuthScreen> {
   var _enteredEmail = '';
   var _enteredPassword = '';
   File? _selectedImage;
+  var isAuthenticating = false;
 
   void _submit() async {
     final isValid = _form.currentState!.validate();
@@ -31,36 +32,54 @@ class _AuthScreenState extends State<AuthScreen> {
 
     _form.currentState!.save();
     if (_isLogin) {
+      setState(() {
+        isAuthenticating = true;
+      });
       try {
         final userCredentials = await _firebase.signInWithEmailAndPassword(
             email: _enteredEmail, password: _enteredPassword);
       } on FirebaseAuthException catch (error) {
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(error.message ?? "Login Failed")));
+            SnackBar(content: Text(error.message ?? "Login Failed"),
+            )
+            
+            ); 
+                setState(() {
+        isAuthenticating = true;
+      });
       }
     } else {
       // sign up the users
 
       try {
+         setState(() {
+        isAuthenticating = true;
+      });
         final userCredentils = await _firebase.createUserWithEmailAndPassword(
             email: _enteredEmail, password: _enteredPassword);
 
-      final storageRef =   FirebaseStorage.instance.ref().child('user_images').child('${userCredentils.user!.uid}.jpg');
-       await storageRef.putFile(_selectedImage!);
-     final imageUrl= await storageRef.getDownloadURL();
-     print(imageUrl);
-      
-      
+        final storageRef = FirebaseStorage.instance
+            .ref()
+            .child('user_images')
+            .child('${userCredentils.user!.uid}.jpg');
+        await storageRef.putFile(_selectedImage!);
+        final imageUrl = await storageRef.getDownloadURL();
+        print(imageUrl);
+
         // if (error.code == 'email-already-in-use') {
         //   // ....
         // }
-       
-      } on FirebaseAuthException catch(error){
-               ScaffoldMessenger.of(context).clearSnackBars();
+      } on FirebaseAuthException catch (error) {
+        ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(error.message ?? 'Authentication Failed'),
+
+          
         ));
+            setState(() {
+        isAuthenticating = true;
+      });
       }
     }
   }
@@ -137,6 +156,9 @@ class _AuthScreenState extends State<AuthScreen> {
                         const SizedBox(
                           height: 12,
                         ),
+                        if (isAuthenticating)             
+                     const    CircularProgressIndicator(),
+                        if (!isAuthenticating)
                         ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Theme.of(context)
@@ -145,6 +167,7 @@ class _AuthScreenState extends State<AuthScreen> {
                             ),
                             onPressed: _submit,
                             child: Text(_isLogin ? 'Login' : 'Sign up')),
+                            if (!isAuthenticating)
                         TextButton(
                           onPressed: () {
                             setState(() {
