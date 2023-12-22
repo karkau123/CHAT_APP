@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:chat_app/screens/widgets/user_image_picker.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -22,6 +23,7 @@ class _AuthScreenState extends State<AuthScreen> {
   var _enteredPassword = '';
   File? _selectedImage;
   var isAuthenticating = false;
+  var _enteredUsername = '';
 
   void _submit() async {
     final isValid = _form.currentState!.validate();
@@ -40,22 +42,20 @@ class _AuthScreenState extends State<AuthScreen> {
             email: _enteredEmail, password: _enteredPassword);
       } on FirebaseAuthException catch (error) {
         ScaffoldMessenger.of(context).clearSnackBars();
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(error.message ?? "Login Failed"),
-            )
-            
-            ); 
-                setState(() {
-        isAuthenticating = true;
-      });
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(error.message ?? "Login Failed"),
+        ));
+        setState(() {
+          isAuthenticating = true;
+        });
       }
     } else {
       // sign up the users
 
       try {
-         setState(() {
-        isAuthenticating = true;
-      });
+        setState(() {
+          isAuthenticating = true;
+        });
         final userCredentils = await _firebase.createUserWithEmailAndPassword(
             email: _enteredEmail, password: _enteredPassword);
 
@@ -65,7 +65,15 @@ class _AuthScreenState extends State<AuthScreen> {
             .child('${userCredentils.user!.uid}.jpg');
         await storageRef.putFile(_selectedImage!);
         final imageUrl = await storageRef.getDownloadURL();
-        print(imageUrl);
+
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userCredentils.user!.uid)
+            .set({
+          'username': _enteredUsername,
+          'email': _enteredEmail,
+          'image_url': imageUrl,
+        });
 
         // if (error.code == 'email-already-in-use') {
         //   // ....
@@ -74,12 +82,10 @@ class _AuthScreenState extends State<AuthScreen> {
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(error.message ?? 'Authentication Failed'),
-
-          
         ));
-            setState(() {
-        isAuthenticating = true;
-      });
+        setState(() {
+          isAuthenticating = true;
+        });
       }
     }
   }
@@ -138,6 +144,23 @@ class _AuthScreenState extends State<AuthScreen> {
                             _enteredEmail = value!;
                           },
                         ),
+                        if (!_isLogin)
+                        TextFormField(
+                          decoration:
+                              const InputDecoration(labelText: 'username'),
+                          enableSuggestions: false,
+                          validator: (value) {
+                            if (value == null ||
+                                value.isEmpty ||
+                                value.trim().length < 4) {
+                              return 'Please enter a valid username (at least 4 charactersc long )';
+                            }
+                            return null;
+                          },
+                          onSaved: (value) {
+                            _enteredUsername = value!;
+                          },
+                        ),
                         TextFormField(
                           decoration: const InputDecoration(
                             labelText: 'Password',
@@ -156,28 +179,27 @@ class _AuthScreenState extends State<AuthScreen> {
                         const SizedBox(
                           height: 12,
                         ),
-                        if (isAuthenticating)             
-                     const    CircularProgressIndicator(),
+                        if (isAuthenticating) const CircularProgressIndicator(),
                         if (!isAuthenticating)
-                        ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme.of(context)
-                                  .colorScheme
-                                  .primaryContainer,
-                            ),
-                            onPressed: _submit,
-                            child: Text(_isLogin ? 'Login' : 'Sign up')),
-                            if (!isAuthenticating)
-                        TextButton(
-                          onPressed: () {
-                            setState(() {
-                              _isLogin = !_isLogin;
-                            });
-                          },
-                          child: Text(_isLogin
-                              ? 'Create an Account '
-                              : 'I already have an Account'),
-                        )
+                          ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Theme.of(context)
+                                    .colorScheme
+                                    .primaryContainer,
+                              ),
+                              onPressed: _submit,
+                              child: Text(_isLogin ? 'Login' : 'Sign up')),
+                        if (!isAuthenticating)
+                          TextButton(
+                            onPressed: () {
+                              setState(() {
+                                _isLogin = !_isLogin;
+                              });
+                            },
+                            child: Text(_isLogin
+                                ? 'Create an Account '
+                                : 'I already have an Account'),
+                          )
                       ],
                     ),
                   ),
