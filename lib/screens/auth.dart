@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:chat_app/screens/widgets/user_image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -27,7 +28,6 @@ class _AuthScreenState extends State<AuthScreen> {
       // show error message  ....
       return;
     }
-     
 
     _form.currentState!.save();
     if (_isLogin) {
@@ -45,11 +45,19 @@ class _AuthScreenState extends State<AuthScreen> {
       try {
         final userCredentils = await _firebase.createUserWithEmailAndPassword(
             email: _enteredEmail, password: _enteredPassword);
-      } on FirebaseAuthException catch (error) {
+
+      final storageRef =   FirebaseStorage.instance.ref().child('user_images').child('${userCredentils.user!.uid}.jpg');
+       await storageRef.putFile(_selectedImage!);
+     final imageUrl= await storageRef.getDownloadURL();
+     print(imageUrl);
+      
+      
         // if (error.code == 'email-already-in-use') {
         //   // ....
         // }
-        ScaffoldMessenger.of(context).clearSnackBars();
+       
+      } on FirebaseAuthException catch(error){
+               ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text(error.message ?? 'Authentication Failed'),
         ));
