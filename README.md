@@ -2,20 +2,16 @@
 
 A new Flutter project.
 
-## Getting Started
+## Video Demonstration
 
-This project is a starting point for a Flutter application.
+[Watch the video here](https://github.com/karkau123/CHAT_APP/assets/105882265/382fd421-c85a-44e7-9ecd-b0d89737ec0e)
 
-A few resources to get you started if this is your first Flutter project:
+## Images
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-
-
-
-https://github.com/karkau123/CHAT_APP/assets/105882265/382fd421-c85a-44e7-9ecd-b0d89737ec0e
-
+<div style="display: flex; flex-wrap: wrap; justify-content: space-around;">
+  <img src="https://github.com/user-attachments/assets/136070f2-7ba8-4a1c-8779-77bbaaac980d" width="200" style="margin: 10px;">
+  <img src="https://github.com/user-attachments/assets/63db6c3f-0e17-4364-82ce-a34377febc94" width="200" style="margin: 10px;">
+  <img src="https://github.com/user-attachments/assets/a1a0b09c-39fa-46b1-9f16-a424aef2f959" width="200" style="margin: 10px;">
+  <img src="https://github.com/user-attachments/assets/48cdc9d2-0048-4383-8b85-e2b740cf9e5d" width="200" style="margin: 10px;">
+  <img src="https://github.com/user-attachments/assets/99751df2-c101-4675-8969-9207fb1c5e7d" width="200" style="margin: 10px;">
+</div>
